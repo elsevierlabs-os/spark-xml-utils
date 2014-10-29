@@ -1,0 +1,57 @@
+<project>
+  <groupId>com.elsevier</groupId>
+  <artifactId>spark-xml-utils</artifactId>
+  <modelVersion>4.0.0</modelVersion>
+  <name>Spark Utilities</name>
+  <packaging>jar</packaging>
+  <version>1.0.0</version>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <dependencies>
+    <dependency> 
+      <groupId>com.amazonaws</groupId> <!-- AWS dependency -->
+      <artifactId>aws-java-sdk</artifactId>
+      <version>1.4.7</version>
+    </dependency>
+    <dependency> 
+      <groupId>net.sf.saxon</groupId> <!-- Saxon dependency -->
+      <artifactId>Saxon-HE</artifactId>
+      <version>9.5.1-6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>  <!-- Apache commons io -->
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+    </dependency>    
+    <dependency>
+      <groupId>commons-logging</groupId>  <!-- Apache commons logging -->
+      <artifactId>commons-logging</artifactId>
+      <version>1.1.1</version>
+    </dependency>    
+    <dependency>
+      <groupId>org.apache.commons</groupId> <!-- Apache commons Lang3 dependency -->
+      <artifactId>commons-lang3</artifactId>
+      <version>3.3</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <finalName>uber-${project.artifactId}-${project.version}</finalName>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

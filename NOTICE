@@ -1,0 +1,38 @@
+This product includes software (AWS SDK for Java) developed by Amazon.com.
+Copyright 2014 Amazon.com, Inc. or its affiliates. All Rights Reserved. 
+
+  * LICENSE:
+    * Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html)
+  * HOMEPAGE:
+    * http://aws.amazon.com/sdk-for-java/
+
+This product includes 'Saxon-HE' developed by Saxonica, an open source product that provides 
+implementations of XSLT 2.0, XQuery 3.0, and XPath 3.0 at the basic level of conformance 
+defined by W3C.
+
+  * LICENSE:
+    * Mozilla Public License version 2.0 (https://www.mozilla.org/MPL/2.0/)
+  * HOMEPAGE:
+    * http://saxon.sourceforge.net/
+
+This product includes  'Apache Commons io' which can be  obtained at:
+
+  * LICENSE:
+    * Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html)
+  * HOMEPAGE:
+    * http://commons.apache.org/proper/commons-io/
+        
+This product includes  'Apache Commons Lang' which can be  obtained at:
+
+  * LICENSE:
+    * Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html)
+  * HOMEPAGE:
+    * http://commons.apache.org/proper/commons-lang/
+    
+This product includes  'Apache Commons Logging', a logging framework, which can be 
+obtained at:
+
+  * LICENSE:
+    * Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html)
+  * HOMEPAGE:
+    * http://commons.apache.org/logging/
