@@ -5,9 +5,11 @@
   <name>Spark Utilities</name>
   <packaging>jar</packaging>
   <version>1.0.0</version>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
   <dependencies>
     <dependency> 
       <groupId>com.amazonaws</groupId> <!-- AWS dependency -->
@@ -42,6 +44,25 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
     </license>
   </licenses>
+
+  <organization>
+    <name>Elsevier, Inc.</name>
+    <url>http://www.elsevier.com</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>dmcbeath</id>
+      <name>Darin</name>
+      <email>d.mcbeath@elsevier.com</email>
+      <organization>Elsevier, Inc.</organization>
+      <organizationUrl>http://www.elsevier.com</organizationUrl>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
 
   <build>
     <plugins>
