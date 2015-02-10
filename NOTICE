@@ -1,11 +1,3 @@
-This product includes software (AWS SDK for Java) developed by Amazon.com.
-Copyright 2014 Amazon.com, Inc. or its affiliates. All Rights Reserved. 
-
-  * LICENSE:
-    * Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html)
-  * HOMEPAGE:
-    * http://aws.amazon.com/sdk-for-java/
-
 This product includes 'Saxon-HE' developed by Saxonica, an open source product that provides 
 implementations of XSLT 2.0, XQuery 3.0, and XPath 3.0 at the basic level of conformance 
 defined by W3C.

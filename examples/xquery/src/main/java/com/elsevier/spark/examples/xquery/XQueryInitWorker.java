@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 package com.elsevier.spark.examples.xquery;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+
 import org.apache.spark.api.java.function.VoidFunction;
+
 import scala.Tuple2;
+
 import com.elsevier.xml.XQueryProcessor;
 
 /**
@@ -31,8 +35,8 @@ import com.elsevier.xml.XQueryProcessor;
  */
 public class XQueryInitWorker  implements VoidFunction<Iterator<Tuple2<String,String>>> {
 
-	private String namespaceMappingsBucket;
-	private String namespaceMappingsKey;
+	private HashMap<String,String> namespaceMappings;
+	
 	
 	/**
 	 * Init the namespace mappings.
@@ -40,16 +44,15 @@ public class XQueryInitWorker  implements VoidFunction<Iterator<Tuple2<String,St
 	 * @param namespaceMappingsBucket
 	 * @param namespaceMappingsKey
 	 */
-	public XQueryInitWorker(String namespaceMappingsBucket, String namespaceMappingsKey)  {
-		this.namespaceMappingsBucket = namespaceMappingsBucket;
-		this.namespaceMappingsKey = namespaceMappingsKey;
+	public XQueryInitWorker(HashMap<String,String> namespaceMappings)  {
+		this.namespaceMappings = namespaceMappings;
 	}
 
 
 	@Override
 	public void call(Iterator<Tuple2<String, String>> arg0) throws IOException  {
 		XQueryProcessor.clear();
-		XQueryProcessor.init(namespaceMappingsBucket,namespaceMappingsKey);		
+		XQueryProcessor.init(namespaceMappings);		
 	}
 	
 }

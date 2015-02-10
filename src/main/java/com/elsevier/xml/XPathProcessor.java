@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.elsevier.xml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -39,13 +40,11 @@ import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.elsevier.s3.SimpleStorageService;
 
 /**
  * Class with static methods to filter an XPath expression (return a TRUE/FALSE)
- * against a string of arbitrary content (or against an object in an S3 bucket)
- * and evaluate an XPath expression (return a serialized response) against a
- * string of arbitrary content (or against an object in an S3 bucket).
+ * against a string of arbitrary xml content and evaluate an XPath expression (return 
+ * a serialized response) against a string of arbitrary xml content.
  * 
  * @author Darin McBeath
  * 
@@ -57,111 +56,27 @@ public class XPathProcessor {
 
 	
 	/**
-	 * Init the SimpleStorageService.  
-	 */
-	public static void init()  {
-
-		SimpleStorageService.init();
-
-	}
-	
-	/**
-	 * Init the SimpleStorageService and NamespaceContext. Set the prefix to
-	 * namespace mappings specified in the object contained in the S3 bucket.
-	 * The object in S3 should contain one namespace prefix to namespace uri
-	 * mapping per line. Within this line, the namespace prefix must precede an
-	 * "=" and the namespace uri must follow the "=".
+	 * Init the NamespaceContext. Set the prefix to namespace mappings specified 
+	 * in the passed HashMap.  
 	 * 
-	 * @param bucket
-	 *            S3 bucket containing the file with the namespace prefix to
-	 *            namespace mappings
-	 * @param key
-	 *            Key for the file with the namespace prefix to namespace
-	 *            mappings
+	 * @param prefixesNamespaces HashMap of namespace prefix / namespace uri mappings
 	 */
-	public static void init(String bucket, String key) throws IOException {
+	public static void init(HashMap<String,String> prefixesNamespaces) throws IOException {
 
-		SimpleStorageService.init();
-		String prefixesNamespaces = SimpleStorageService.getObject(bucket, key);
 		NamespaceContextMappings.init(prefixesNamespaces);
 
 	}
 
 	/**
-	 * Clear the S3 client and the namespace prefix uri mappings. Useful if you
-	 * want to reset the AWS credentials or use a different set of namespace
-	 * mappings.
+	 * Clear namespace prefix / namespace uri mappings. Useful if you want to use a 
+	 * different set of prefix/namespace mappings.
 	 */
 	public static void clear() {
 
-		SimpleStorageService.clear();
 		NamespaceContextMappings.emptyCache();
 
 	}
 
-	/**
-	 * Filter the xpathExpression to the content identified in the S3 bucket.
-	 * 
-	 * @param bucket
-	 *            S3 bucket containing the content to which the xpathExpression
-	 *            will be applied
-	 * @param key
-	 *            identifier for the content in the S3 bucket to which the
-	 *            xpathExpression will be applied
-	 * @param xpathExpression
-	 *            XPath expression to apply to the content
-	 * @return TRUE if the xpathExpression evaluates to true, FALSE otherwise
-	 */
-	public static boolean filterBucketKey(String bucket, String key,
-			String xpathExpression) {
-
-		try {
-
-			return filter(
-					new StreamSource(IOUtils.toInputStream(
-							SimpleStorageService.getObject(bucket, key),
-							CharEncoding.UTF_8)), xpathExpression);
-
-		} catch (IOException e) {
-			
-			log.error("Problems processing the content. BUCKET:" + bucket + " KEY:" + key + " " + e.getMessage(),e);
-			return false;
-			
-		}
-
-	}
-
-	/**
-	 * Apply the xpathExpression to the content identified in the S3 bucket and return a serialized response.
-	 * 
-	 * @param bucket
-	 *            S3 bucket containing the content to which the xpathExpression
-	 *            will be applied
-	 * @param key
-	 *            identifier for the content in the S3 bucket to which the
-	 *            xpathExpression will be applied
-	 * @param xpathExpression
-	 *            XPath expression to apply to the content
-	 * @return Serialized response from the evaluation
-	 */
-	public static String evaluateBucketKey(String bucket, String key,
-			String xpathExpression) {
-
-		try {
-
-			return evaluate(
-					new StreamSource(IOUtils.toInputStream(
-							SimpleStorageService.getObject(bucket, key),
-							CharEncoding.UTF_8)), xpathExpression);
-
-		} catch (IOException e) {
-			
-			log.error("Problems processing the content. BUCKET:" + bucket + " KEY:" + key + " " + e.getMessage(),e);
-			return "<error/>";
-			
-		}
-
-	}
 
 	/**
 	 * Filter the xpathExpression to the specified string.
@@ -189,6 +104,7 @@ public class XPathProcessor {
 
 	}
 
+	
 	/**
 	 * Apply the xpathExpression to the specified string and return a serialized
 	 * response.
@@ -197,7 +113,7 @@ public class XPathProcessor {
 	 *            String to which the xpathExpression will be applied
 	 * @param xpathExpression
 	 *            XPath expression to apply to the content
-	 * @return Serialized response from the evaluation
+	 * @return Serialized response from the evaluation.  If an error, the response will be "<error/>".
 	 */
 	public static String evaluateString(String content, String xpathExpression) {
 
@@ -216,6 +132,7 @@ public class XPathProcessor {
 
 	}
 
+	
 	/**
 	 * Filter the xpathExpression to the specified content
 	 * 
@@ -258,6 +175,7 @@ public class XPathProcessor {
 
 	}
 
+	
 	/**
 	 * Apply the xpathExpression to the specified content and return a serialized
 	 * response.
@@ -266,7 +184,7 @@ public class XPathProcessor {
 	 *            content to which the xpathExpression will be applied
 	 * @param xpathExpression
 	 *            XPath expression to apply to the content
-	 * @return Serialized response from the evaluation
+	 * @return Serialized response from the evaluation.  If an error, the response will be "<error/>".
 	 */
 	private static String evaluate(StreamSource content, String xpathExpression) {
 
@@ -283,8 +201,7 @@ public class XPathProcessor {
 
 			XPathSelector xsel = xpathCompiler.compile(xpathExpression).load();
 
-			// Set the source document for which the xpath expression should be
-			// applied
+			// Set the source document for which the xpath expression should be applied
 			DocumentBuilder builder = proc.newDocumentBuilder();
 			XdmNode xmlDoc = builder.build(content);
 			xsel.setContextItem(xmlDoc);
@@ -295,8 +212,7 @@ public class XPathProcessor {
 			out.setOutputStream(baos);
 			// Appears ok to always set output property to xml (even if we are just returning a text string)
 			out.setOutputProperty(Serializer.Property.METHOD, "xml");
-			out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION,
-					"yes");
+			out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION,"yes");			
 			out.setProcessor(proc);
 
 			// Evaluate the xpath expression
@@ -324,6 +240,7 @@ public class XPathProcessor {
 
 	}
 
+	
 	/**
 	 * Set the namespaces in the XPathCompiler.
 	 * 
@@ -332,8 +249,7 @@ public class XPathProcessor {
 	private static void setPrefixNamespaceMappings(XPathCompiler xpathCompiler) {
 
 		// Get the mappings
-		Set<Entry<String, String>> mappings = NamespaceContextMappings
-				.getMappings();
+		Set<Entry<String, String>> mappings = NamespaceContextMappings.getMappings();			
 
 		// If mappings exist, set the namespaces
 		if (mappings != null) {
@@ -341,8 +257,7 @@ public class XPathProcessor {
 			Iterator<Entry<String, String>> it = mappings.iterator();
 			while (it.hasNext()) {
 				Entry<String, String> entry = it.next();
-				xpathCompiler
-						.declareNamespace(entry.getKey(), entry.getValue());
+				xpathCompiler.declareNamespace(entry.getKey(), entry.getValue());					
 			}
 		}
 

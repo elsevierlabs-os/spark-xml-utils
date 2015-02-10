@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+
 /**
  * URI Resolver that will be used by XLTProcessor when resolving xsl:import and
  * xsl:include statements. The purpose of this class is to create a local cache
- * of the stylesheets retrieved from S3 so they don't need to be retrieved from
- * S3 on subsequent requests.
+ * of the stylesheets retrieved (presumably) from S3 so they don't need to be 
+ * re-retrieved from S3 on subsequent requests.
  * 
  * @author Darin McBeath
  * 
@@ -46,34 +47,31 @@ public class S3URIResolver implements URIResolver {
 	// Logger
 	private static Log log = LogFactory.getLog(S3URIResolver.class);
 
+	
 	/**
 	 * Return the requested stylesheet. If the stylesheet hasn't been cached,
 	 * then save the stylesheet to the cache. The assumption (although not
 	 * required) is that the imported/included stylesheets will be stored in an
 	 * S3 bucket and accessible using an S3 url.
 	 * 
-	 * @param href
-	 *            url for the stylesheet
-	 * @param Stylesheet
+	 * @param href url for the stylesheet
+	 * @param base not used (assuming absolute urls)
 	 */
 	public Source resolve(String href, String base) throws TransformerException {
 
 		try {
 			// Check local cache
 			if (stylesheetMap.containsKey(href)) {
-				return new StreamSource(IOUtils.toInputStream(stylesheetMap
-						.get(href)));
+				return new StreamSource(IOUtils.toInputStream(stylesheetMap.get(href)));						
 			} else {
 
 				// Read the data from the URL and populate the cache
 				URL theUrl = new URL(href);
 				synchronized (this) {
-					stylesheetMap.put(href,
-							IOUtils.toString(theUrl.openStream()));
+					stylesheetMap.put(href,IOUtils.toString(theUrl.openStream()));							
 				}
 				// Return a StreamSource
-				return new StreamSource(IOUtils.toInputStream(stylesheetMap
-						.get(href)));
+				return new StreamSource(IOUtils.toInputStream(stylesheetMap.get(href)));						
 			}
 
 		} catch (IOException e) {
@@ -84,6 +82,7 @@ public class S3URIResolver implements URIResolver {
 		}
 	}
 
+	
 	/**
 	 * Clear the cache for the imported/included stylesheets.
 	 */
@@ -96,4 +95,5 @@ public class S3URIResolver implements URIResolver {
 			}
 		}
 	}
+	
 }

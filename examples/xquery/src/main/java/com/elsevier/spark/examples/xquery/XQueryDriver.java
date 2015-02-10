@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  *
  */
 package com.elsevier.spark.examples.xquery;
+
+import java.util.HashMap;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
@@ -32,16 +34,12 @@ import scala.Tuple2;
  * Spark cluster.  In the code below, a sample hadoop sequence file is loaded from
  * S3.  It is then evaluated by an xquery expression and a subset of the nodes (xocs:meta)
  * are extracted.  The final RDD is then persisted back to S3.  The workers in the Spark
- * cluster will execute the code in XQueryEvaulateWorker.
+ * cluster will execute the code in XQueryInitWorker and XQueryEvaulateWorker.
  * 
  * @author mcbeathd
  *
  */
 public class XQueryDriver {
-
-	// Literals for the AWS keys
-	public static final String AWS_ACCESS_KEY_ID = "AWS_ACCESS_KEY_ID";
-	public static final String AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY";
 	
 	/**
 	 * Mainline
@@ -54,10 +52,6 @@ public class XQueryDriver {
 		
 		// Comment out below to use the stand-alone cluster
 		//conf.setMaster("local[2]");
-		
-		// Set environment variables for the executors
-		conf.setExecutorEnv(AWS_ACCESS_KEY_ID,System.getenv(AWS_ACCESS_KEY_ID));
-		conf.setExecutorEnv(AWS_SECRET_ACCESS_KEY,System.getenv(AWS_SECRET_ACCESS_KEY));
 
 		// Create and Initialize a SparkContext
 		JavaSparkContext sc = new JavaSparkContext(conf);
@@ -68,8 +62,10 @@ public class XQueryDriver {
 
 		System.out.println("Number of initial records is " + xmlKeyPairRDD.count());
 		
-		// Init the partitions.  S3 bucket is 'els-ats' and key is 'Namespaces/SDNamespaceContext'
-		xmlKeyPairRDD.foreachPartition(new XQueryInitWorker("els-ats","Namespaces/SDNamespaceContext"));
+		// Init the partitions.  
+		HashMap<String,String> pfxUriMap = new HashMap<String,String>();
+		pfxUriMap.put("xocs", "http://www.elsevier.com/xml/xocs/dtd");
+		xmlKeyPairRDD.foreachPartition(new XQueryInitWorker(pfxUriMap));
 						
 		// Only get the 'meta' section for documents
 		JavaPairRDD<String, String> metaXmlKeyPairRDD = xmlKeyPairRDD.mapValues(new XQueryEvaluateWorker("for $meta in /xocs:doc/xocs:meta return $meta"));

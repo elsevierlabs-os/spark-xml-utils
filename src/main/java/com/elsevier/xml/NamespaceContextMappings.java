@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
  */
 package com.elsevier.xml;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -29,6 +26,7 @@ import javax.xml.namespace.NamespaceContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 
 /**
  * Class which provides the ability to 'register' namespace prefix to namespace
@@ -49,35 +47,28 @@ public class NamespaceContextMappings implements NamespaceContext {
 	// Logger
 	private static Log log = LogFactory.getLog(NamespaceContextMappings.class);
 	
+	
 	/**
-	 * Init the cache with the string of prefixes and namespaces. Within the
-	 * string, a newline will separate each record. The namespace prefix will
-	 * precede the "=" and the namespace uri will follow the '=".
+	 * Init the cache with the passed HashMap of prefixes and namespaces. 
 	 * 
-	 * @param prefixesNamespaces
-	 * @throws IOException
+	 * @param initPrefixNamespaceMap HashMap of prefixes and namespaces
 	 */
-	public static void init(String prefixesNamespaces) throws IOException {
+	public static void init(HashMap<String,String> initPrefixNamespaceMap)  {
 
 		if (prefixNamespaceMap == null) {
 			synchronized (NamespaceContextMappings.class) {
 				if (prefixNamespaceMap == null) {
 
+					// Add the defaults
 					prefixNamespaceMap = new HashMap<String, String>();
 					prefixNamespaceMap.put("xml", XMLConstants.XML_NS_URI);
 					prefixNamespaceMap.put("fn",
 							"http://www.w3.org/2005/xpath-functions");
 					prefixNamespaceMap.put("xs",
 							"http://www.w3.org/2001/XMLSchema");
-					BufferedReader bufReader = new BufferedReader(
-							new StringReader(prefixesNamespaces));
-					String line;
-					while ((line = bufReader.readLine()) != null) {
-						String[] toks = line.split("=");
-						if (toks.length == 2) {
-							prefixNamespaceMap.put(toks[0], toks[1]);
-						}
-					}
+					
+					// Add those passed to init
+					prefixNamespaceMap.putAll(initPrefixNamespaceMap);
 
 					// Output the list of namespace prefix to uri mappings
 					Set<String> keys = prefixNamespaceMap.keySet();
@@ -95,6 +86,7 @@ public class NamespaceContextMappings implements NamespaceContext {
 
 	}
 
+	
 	/**
 	 * Clear the cache.
 	 */
@@ -110,6 +102,7 @@ public class NamespaceContextMappings implements NamespaceContext {
 
 	}
 
+	
 	/**
 	 * Get the Namespace Prefix to Uri Mappings. This will be used by the
 	 * XPathProcessor and XQueryProcessor when setting namespaces.
@@ -126,14 +119,15 @@ public class NamespaceContextMappings implements NamespaceContext {
 
 	}
 
+	
 	/**
 	 * Provide namespace prefix to namespace uri resolution capability. All of
 	 * the namespace prefixed declared in XPath Expressions should be mapped to
 	 * the correct URI (in the XML) otherwise the evaluation will not be
 	 * correct.
 	 * 
-	 * @param prefix
-	 *            Namespace prefix
+	 * @param prefix Namespace prefix
+	 *            
 	 * @return Namespace uri
 	 */
 	public String getNamespaceURI(String prefix) {
@@ -149,13 +143,15 @@ public class NamespaceContextMappings implements NamespaceContext {
 		
 	}
 
+	
 	public String getPrefix(String uri) {
 		
 		throw new UnsupportedOperationException();
 		
 	}
 
-	public Iterator getPrefixes(String uri) {
+	
+	public Iterator<String> getPrefixes(String uri) {
 		
 		throw new UnsupportedOperationException();
 		

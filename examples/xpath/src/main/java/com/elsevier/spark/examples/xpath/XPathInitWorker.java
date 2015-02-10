@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 package com.elsevier.spark.examples.xpath;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+
 import org.apache.spark.api.java.function.VoidFunction;
+
 import scala.Tuple2;
+
 import com.elsevier.xml.XPathProcessor;
 
 /**
@@ -31,8 +35,8 @@ import com.elsevier.xml.XPathProcessor;
  */
 public class XPathInitWorker implements VoidFunction<Iterator<Tuple2<String,String>>> {
 
-	private String namespaceMappingsBucket;
-	private String namespaceMappingsKey;
+	private HashMap<String,String> namespaceMappings;
+
 
 	/**
 	 * Init the namespace mappings.
@@ -40,16 +44,15 @@ public class XPathInitWorker implements VoidFunction<Iterator<Tuple2<String,Stri
 	 * @param namespaceMappingsBucket
 	 * @param namespaceMappingsKey
 	 */
-	public XPathInitWorker(String namespaceMappingsBucket, String namespaceMappingsKey)  {
-		this.namespaceMappingsBucket = namespaceMappingsBucket;
-		this.namespaceMappingsKey = namespaceMappingsKey;
+	public XPathInitWorker(HashMap<String,String> namespaceMappings)  {
+		this.namespaceMappings = namespaceMappings;
 	}
 
 
 	@Override
 	public void call(Iterator<Tuple2<String, String>> arg0) throws IOException  {
 		XPathProcessor.clear();
-		XPathProcessor.init(namespaceMappingsBucket,namespaceMappingsKey);		
+		XPathProcessor.init(namespaceMappings);		
 	}
 	
 }

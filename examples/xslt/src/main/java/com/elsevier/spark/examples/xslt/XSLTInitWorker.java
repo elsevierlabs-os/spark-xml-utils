@@ -18,8 +18,11 @@ package com.elsevier.spark.examples.xslt;
 
 import java.io.IOException;
 import java.util.Iterator;
+
 import org.apache.spark.api.java.function.VoidFunction;
+
 import scala.Tuple2;
+
 import com.elsevier.xml.XSLTProcessor;
 
 /**
@@ -31,10 +34,25 @@ import com.elsevier.xml.XSLTProcessor;
  */
 public class XSLTInitWorker  implements VoidFunction<Iterator<Tuple2<String,String>>> {
 
+	private String stylesheetName;
+	private String stylesheet;
+
+	/**
+	 * Init the stylesheet.
+	 * 
+	 * @param namespaceMappingsBucket
+	 * @param namespaceMappingsKey
+	 */
+	public XSLTInitWorker(String stylesheetName, String stylesheet)  {
+		this.stylesheetName = stylesheetName;
+		this.stylesheet = stylesheet;
+	}
+	
+	
 	@Override
 	public void call(Iterator<Tuple2<String, String>> arg0) throws IOException  {
 		XSLTProcessor.clear();		
-		XSLTProcessor.init();
+		XSLTProcessor.init(stylesheetName,stylesheet);
 	}
 	
 }

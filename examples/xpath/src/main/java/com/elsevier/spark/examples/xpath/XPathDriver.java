@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
  */
 package com.elsevier.spark.examples.xpath;
 
+import java.util.HashMap;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
@@ -25,6 +27,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
+
 
 /**
  * Sample 'driver' class that provides example usage of the XPathProcessor methods.
@@ -39,9 +42,6 @@ import scala.Tuple2;
  */
 public class XPathDriver {
 
-	// Literals for the AWS keys
-	public static final String AWS_ACCESS_KEY_ID = "AWS_ACCESS_KEY_ID";
-	public static final String AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY";
 	
 	/**
 	 * Mainline
@@ -54,10 +54,6 @@ public class XPathDriver {
 		
 		// Comment out below to use the stand-alone cluster
 		//conf.setMaster("local[2]");
-		
-		// Set environment variables for the executors
-		conf.setExecutorEnv(AWS_ACCESS_KEY_ID,System.getenv(AWS_ACCESS_KEY_ID));
-		conf.setExecutorEnv(AWS_SECRET_ACCESS_KEY,System.getenv(AWS_SECRET_ACCESS_KEY));
 
 		// Create and Initialize a SparkContext
 		JavaSparkContext sc = new JavaSparkContext(conf);
@@ -68,8 +64,10 @@ public class XPathDriver {
 
 		System.out.println("Number of initial records is " + xmlKeyPairRDD.count());
 		
-		// Init the partitions.  S3 bucket is 'els-ats' and key is 'Namespaces/SDNamespaceContext'
-		xmlKeyPairRDD.foreachPartition(new XPathInitWorker("els-ats","Namespaces/SDNamespaceContext"));
+		// Init the partitions.  
+		HashMap<String,String> pfxUriMap = new HashMap<String,String>();
+		pfxUriMap.put("xocs", "http://www.elsevier.com/xml/xocs/dtd");
+		xmlKeyPairRDD.foreachPartition(new XPathInitWorker(pfxUriMap));
 		
 		// Filter the RDD
 		JavaPairRDD<String, String> filteredXmlKeyPairRDD = xmlKeyPairRDD.filter(new XPathFilterWorker("//xocs:item-version-number[. = 'S300.1']"));

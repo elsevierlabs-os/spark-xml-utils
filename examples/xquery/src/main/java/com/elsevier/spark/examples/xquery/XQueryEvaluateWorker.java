@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ public class XQueryEvaluateWorker  implements Function<String,String> {
 		this.xqueryExpression = xqueryExpression;
 	}
 
+	
 	@Override
 	public String call(String value) {
 		return XQueryProcessor.evaluateString(value, xqueryExpression);

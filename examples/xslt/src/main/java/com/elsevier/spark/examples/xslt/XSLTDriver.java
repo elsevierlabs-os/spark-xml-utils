@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.PairFunction;
 
@@ -32,16 +33,12 @@ import scala.Tuple2;
  * Spark cluster.  In the code below, a sample hadoop sequence file is loaded from
  * S3.  It is then transformed by the XSLTProcessor (using a specified stylesheet).
  * The final RDD is then persisted back to S3.  The workers in the Spark
- * cluster will execute the code in XSLTTransformWorker.
+ * cluster will execute the code in XSLTInitWorker and XSLTTransformWorker.
  * 
  * @author mcbeathd
  *
  */
 public class XSLTDriver {
-
-	// Literals for the AWS keys
-	public static final String AWS_ACCESS_KEY_ID = "AWS_ACCESS_KEY_ID";
-	public static final String AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY";
 	
 	/**
 	 * Mainline
@@ -55,24 +52,24 @@ public class XSLTDriver {
 		// Comment out below to use the stand-alone cluster
 		//conf.setMaster("local[2]");
 		
-		// Set environment variables for the executors
-		conf.setExecutorEnv(AWS_ACCESS_KEY_ID,System.getenv(AWS_ACCESS_KEY_ID));
-		conf.setExecutorEnv(AWS_SECRET_ACCESS_KEY,System.getenv(AWS_SECRET_ACCESS_KEY));
-
 		// Create and Initialize a SparkContext
 		JavaSparkContext sc = new JavaSparkContext(conf);
-			
+		
 		// Load up a hadoop sequence file (key will be the pii, value is the xml)
 		JavaPairRDD<Text,Text> xmlRDDReadable = sc.hadoopFile("s3n://els-ats/darin/sd-test-xml", SequenceFileInputFormat.class, Text.class, Text.class);
 		JavaPairRDD<String, String> xmlKeyPairRDD = xmlRDDReadable.mapToPair(new ConvertFromWritableTypes()).cache();	
 
 		System.out.println("Number of initial records is " + xmlKeyPairRDD.count());
 		
+		// Read in the stylesheet.  The stylesheet can't have newlines because we are using textFile.
+		JavaRDD<String> stylesheetRDD = sc.textFile("s3n://spark-stylesheets/srctitle.xsl");
+		String stylesheet = stylesheetRDD.collect().get(0);
+
 		// Init the partitions. 
-		xmlKeyPairRDD.foreachPartition(new XSLTInitWorker()); 
+		xmlKeyPairRDD.foreachPartition(new XSLTInitWorker("srctitle",stylesheet)); 
 						
 		// Transform the content.  S3 bucket is 'spark-stylesheets' and key is 'xmlMeta2json.xsl'
-		JavaPairRDD<String, String> transformXmlKeyPairRDD = xmlKeyPairRDD.mapValues(new XSLTTransformWorker("spark-stylesheets","xmlMeta2json.xsl"));
+		JavaPairRDD<String, String> transformXmlKeyPairRDD = xmlKeyPairRDD.mapValues(new XSLTTransformWorker("srctitle"));
 		
 		// Save the results back to S3 as a hadoop sequence file
 		JavaPairRDD<Text, Text> transformRDDWritable = transformXmlKeyPairRDD.mapToPair(new ConvertToWritableTypes());

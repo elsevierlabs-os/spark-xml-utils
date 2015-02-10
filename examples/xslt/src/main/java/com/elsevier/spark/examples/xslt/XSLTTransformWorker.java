@@ -1,5 +1,5 @@
 /*
- * Copyright (c)2014 Elsevier, Inc.
+ * Copyright (c)2015 Elsevier, Inc.
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,32 +21,30 @@ import com.elsevier.xml.XSLTProcessor;
 
 /**
  * This class will be executed by a 'worker' in the Spark cluster.  The focus of this class
- * is to transform a record using the provided bucket/stylesheet.
+ * is to transform a record using the specified stylesheet.
  * 
  * @author mcbeathd
  *
  */
 public class XSLTTransformWorker  implements Function<String,String> {
 
-	private String stylesheetBucket;
-	private String stylesheetKey;
+	private String stylesheetName;
 
 	
 	/**
-	 * Save the stylesheet bucket/key to be used in the transformation.
+	 * Save the stylesheet name to be used in the transformation.
 	 * 
 	 * @param stylesheetBucket
 	 * @param stylesheetKey
 	 */
-	public XSLTTransformWorker(String stylesheetBucket, String stylesheetKey) {
-		this.stylesheetBucket = stylesheetBucket;
-		this.stylesheetKey = stylesheetKey;
+	public XSLTTransformWorker(String stylesheetName) {
+		this.stylesheetName = stylesheetName;
 	}
 
+	
 	@Override
 	public String call(String value) throws Exception {
-		return XSLTProcessor.transform(stylesheetBucket, stylesheetKey, value);
+		return XSLTProcessor.transform(stylesheetName, value);
 	}
-
 	
 }
