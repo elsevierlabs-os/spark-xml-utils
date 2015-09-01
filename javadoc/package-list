@@ -1,1 +1,3 @@
-com.elsevier.xml
+com.elsevier.spark_xml_utils.xpath
+com.elsevier.spark_xml_utils.xquery
+com.elsevier.spark_xml_utils.xslt

@@ -4,32 +4,32 @@
   <modelVersion>4.0.0</modelVersion>
   <name>Spark Utilities</name>
   <packaging>jar</packaging>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
-    <dependency> 
+    <dependency>
       <groupId>net.sf.saxon</groupId> <!-- Saxon dependency -->
       <artifactId>Saxon-HE</artifactId>
-      <version>9.5.1-6</version>
+      <version>9.6.0-7</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>  <!-- Apache commons io -->
       <artifactId>commons-io</artifactId>
       <version>2.4</version>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>commons-logging</groupId>  <!-- Apache commons logging -->
       <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>    
+      <version>1.2</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId> <!-- Apache commons Lang3 dependency -->
       <artifactId>commons-lang3</artifactId>
-      <version>3.3</version>
+      <version>3.4</version>
     </dependency>
   </dependencies>
 
@@ -48,7 +48,7 @@
   <developers>
     <developer>
       <id>dmcbeath</id>
-      <name>Darin</name>
+      <name>Darin McBeath</name>
       <email>d.mcbeath@elsevier.com</email>
       <organization>Elsevier, Inc.</organization>
       <organizationUrl>http://www.elsevier.com</organizationUrl>
@@ -73,6 +73,16 @@
           </execution>
         </executions>
         <configuration>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+                <excludes>
+                  <exclude>META-INF/*.SF</exclude>
+                  <exclude>META-INF/*.DSA</exclude>
+                  <exclude>META-INF/*.RSA</exclude>
+                </excludes>
+            </filter>
+          </filters>
           <finalName>uber-${project.artifactId}-${project.version}</finalName>
         </configuration>
       </plugin>
