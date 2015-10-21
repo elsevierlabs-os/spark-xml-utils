@@ -10,4 +10,10 @@ The javadoc is available for spark-xml-utils and could be helpful with understan
 
 ## Motivation
 
-The spark-xml-utils library was developed because there is a large amount of xml in our big datasets and I felt this data could be better served by providing some helpful xml utilities.  This includes the ability to filter documents  based on an xpath expression, return specific nodes for an xpath/xquery expression, or transform documents using a xslt stylesheet.  By providing some basic wrappers to [Saxon](http://www.saxonica.com), the spark-xml-utils library exposes some basic [XPath](https://github.com/elsevierlabs/spark-xml-utils/wiki/xpath), [XSLT](https://github.com/elsevierlabs/spark-xml-utils/wiki/xslt), and [XQuery](https://github.com/elsevierlabs/spark-xml-utils/wiki/xquery) functionality that can readily be leveraged by any Spark application.  
+The spark-xml-utils library was developed because there is a large amount of xml in our big datasets and I felt this data could be better served by providing some helpful xml utilities.  This includes the ability to filter documents  based on an xpath expression, return specific nodes for an xpath/xquery expression, or transform documents using a xslt stylesheet.  By providing some basic wrappers to [Saxon](http://www.saxonica.com), the spark-xml-utils library exposes some basic XPath, XQuery, and XSLT functionality that can readily be leveraged by any Spark application.  
+
+## Examples
+
+The  sequence file used in all of the examples are publicly available in s3://spark-xml-utils/xml.  In the sequence file, the key is a unique identifier for the record and the value is the XML (as a string).  This should allow you to try out the examples as well as experiment with your own expressions.
+
+Once you are comfortable with the provided basic [XPath](https://github.com/elsevierlabs/spark-xml-utils/wiki/xpath), [XQuery](https://github.com/elsevierlabs/spark-xml-utils/wiki/xquery), and [XSLT](https://github.com/elsevierlabs/spark-xml-utils/wiki/xslt) examples, there are also some more [complex examples](https://github.com/elsevierlabs/spark-xml-utils/wiki/complexexamples) available to further showcase the power of spark-xml-utils.
