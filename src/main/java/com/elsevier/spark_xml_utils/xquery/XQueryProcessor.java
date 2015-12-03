@@ -58,6 +58,7 @@ public class XQueryProcessor implements Serializable {
 	// Member variables
 	private String xQueryExpression = null;
 	private HashMap<String,String> namespaceMappings = null;
+	private HashMap<String,Object> featureMappings = null;
 	private transient Processor proc  = null;
 	private transient XQueryExecutable exp = null;
 	private transient XQueryEvaluator eval = null;
@@ -66,17 +67,18 @@ public class XQueryProcessor implements Serializable {
 
 	
 	/** 
-	 * Private constructor.  Create an instance of XQueryProcessor and do a one time initialization to improve
-	 * performance for repetitive invocations of evaluate expressions. 
+	 * Create an instance of XQueryProcessor. 
 	 * 
 	 * @param xQueryExpression XQuery expression to apply to the content
 	 * @param namespaceMappings Namespace prefix to Namespace uri mappings
+	 * @param featureMappings Processor feature mappings
 	 * @throws XQueryException
 	 */
-	private XQueryProcessor(String xQueryExpression, HashMap<String,String> namespaceMappings) throws XQueryException  {
+	private XQueryProcessor(String xQueryExpression, HashMap<String,String> namespaceMappings, HashMap<String,Object> featureMappings) throws XQueryException  {
 			
 		this.xQueryExpression = xQueryExpression;
 		this.namespaceMappings = namespaceMappings;
+		this.featureMappings = featureMappings;
 		
 	}
 
@@ -110,7 +112,7 @@ public class XQueryProcessor implements Serializable {
 	 */
 	public static XQueryProcessor getInstance(String xQueryExpression) throws XQueryException {
 			
-		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, null);	
+		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, null, null);	
 		proc.init();
 		return proc;
 		
@@ -127,13 +129,31 @@ public class XQueryProcessor implements Serializable {
 	 */
 	public static XQueryProcessor getInstance(String xQueryExpression, HashMap<String,String> namespaceMappings) throws XQueryException {
 			
-		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, namespaceMappings);	
+		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, namespaceMappings, null);	
 		proc.init();
 		return proc;
 		
 	}
 	
 
+	/**
+	 * Get an instance of XQueryProcessor.
+	 * 
+	 * @param xQueryExpression XQuery expression to apply to the content
+	 * @param namespaceMappings Namespace prefix to Namespace uri mappings
+	 * @param featureMappings Processor feature mappings
+	 * @return XQueryProcessor
+	 * @throws XQueryException 
+	 */
+	public static XQueryProcessor getInstance(String xQueryExpression, HashMap<String,String> namespaceMappings, HashMap<String,Object> featureMappings) throws XQueryException {
+			
+		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, namespaceMappings, featureMappings);	
+		proc.init();
+		return proc;
+		
+	}
+	
+	
 	/**
 	 * Initialization to improve performance for repetitive invocations of evaluate expressions
 	 * 
@@ -146,6 +166,13 @@ public class XQueryProcessor implements Serializable {
 			// Get the processor
 			proc = new Processor(false);
 
+			// Set any specified configuration properties for the processor
+			if (featureMappings != null) {
+				for (Entry<String, Object> entry : featureMappings.entrySet()) {
+					proc.setConfigurationProperty(entry.getKey(), entry.getValue());
+				}
+			}
+			
 			// Get the XQuery compiler
 			XQueryCompiler xqueryCompiler = proc.newXQueryCompiler();
 			xqueryCompiler.setEncoding(CharEncoding.UTF_8);

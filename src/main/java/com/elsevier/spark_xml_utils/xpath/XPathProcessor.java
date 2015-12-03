@@ -62,6 +62,7 @@ public class XPathProcessor implements Serializable {
 	// Member variables
 	private String xPathExpression = null;
 	private HashMap<String,String> namespaceMappings = null;
+	private HashMap<String,Object> featureMappings = null;
 	private transient XPathSelector xsel = null;
 	private transient DocumentBuilder builder = null;
 	private transient Processor proc  = null;
@@ -69,17 +70,18 @@ public class XPathProcessor implements Serializable {
 	private transient ByteArrayOutputStream baos = null;
 	
 	/** 
-	 * Create an instance of XPathProcessor and do a one time initialization to improve
-	 * performance for repetitive invocations of filter and evaluate expressions. 
+	 * Create an instance of XPathProcessor. 
 	 * 
 	 * @param xPathExpression XPath expression to apply to the content
 	 * @param namespaceMappings Namespace prefix to Namespace uri mappings
+	 * @param featureMappings Processor feature mappings
 	 * @throws XPathException
 	 */
-	private XPathProcessor(String xPathExpression, HashMap<String,String> namespaceMappings) throws XPathException  {
+	private XPathProcessor(String xPathExpression, HashMap<String,String> namespaceMappings, HashMap<String,Object> featureMappings) throws XPathException  {
 	
 		this.xPathExpression = xPathExpression;
 		this.namespaceMappings = namespaceMappings;
+		this.featureMappings = featureMappings;
 		
 	}
 
@@ -113,7 +115,7 @@ public class XPathProcessor implements Serializable {
 	 */
 	public static XPathProcessor getInstance(String xPathExpression) throws XPathException {
 		
-		XPathProcessor proc = new XPathProcessor(xPathExpression, null);	
+		XPathProcessor proc = new XPathProcessor(xPathExpression, null, null);	
 		proc.init();
 		return proc;
 		
@@ -130,12 +132,29 @@ public class XPathProcessor implements Serializable {
 	 */
 	public static XPathProcessor getInstance(String xPathExpression, HashMap<String,String> namespaceMappings) throws XPathException {
 		
-		XPathProcessor proc = new XPathProcessor(xPathExpression, namespaceMappings);	
+		XPathProcessor proc = new XPathProcessor(xPathExpression, namespaceMappings, null);	
 		proc.init();
 		return proc;
 		
 	}
+
 	
+	/**
+	 * Get an instance of XPathProcessor.
+	 * 
+	 * @param xPathExpression XPath expression to apply to the content
+	 * @param namespaceMappings Namespace prefix to Namespace uri mappings
+	 * @param featureMappings Processor feature mappings
+	 * @return XPathProcessor
+	 * @throws XPathException 
+	 */
+	public static XPathProcessor getInstance(String xPathExpression, HashMap<String,String> namespaceMappings, HashMap<String,Object> featureMappings) throws XPathException {
+		
+		XPathProcessor proc = new XPathProcessor(xPathExpression, namespaceMappings, featureMappings);	
+		proc.init();
+		return proc;
+		
+	}
 	
 	/**
 	 * Initialization to improve performance for repetitive invocations of filter and evaluate expressions
@@ -147,10 +166,19 @@ public class XPathProcessor implements Serializable {
 		try {
 		
 			log.info("***** XPathProcessor init called.");
-		
+			
 			// Get the processor
 			proc = new Processor(false);
 
+			// Set any specified configuration properties for the processor
+			if (featureMappings != null) {
+				for (Entry<String, Object> entry : featureMappings.entrySet()) {
+					proc.setConfigurationProperty(entry.getKey(), entry.getValue());
+				}
+			}
+			
+			//proc.setConfigurationProperty(FeatureKeys.ENTITY_RESOLVER_CLASS, "com.elsevier.spark_xml_utils.common.IgnoreDoctype");
+			
 			// Get the XPath compiler
 			XPathCompiler xpathCompiler = proc.newXPathCompiler();
 

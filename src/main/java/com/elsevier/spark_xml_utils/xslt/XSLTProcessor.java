@@ -20,6 +20,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -50,6 +52,7 @@ public class XSLTProcessor implements Serializable {
 	private static Log log = LogFactory.getLog(XSLTProcessor.class);
 
 	// Member variables
+	private HashMap<String,Object> featureMappings = null;
 	private String stylesheet = null;
 	private transient Processor proc  = null;
 	private transient Serializer serializer = null;
@@ -57,9 +60,17 @@ public class XSLTProcessor implements Serializable {
 	private transient XsltTransformer trans = null;
 	
 	
-	private XSLTProcessor(String stylesheet) throws XSLTException  {
+	/**
+	 * Create an instance of XSLTProcessor.
+	 *  
+	 * @param stylesheet 
+	 * @param featureMappings Processor feature mappings
+	 * @throws XSLTException
+	 */
+	private XSLTProcessor(String stylesheet, HashMap<String,Object> featureMappings) throws XSLTException  {
 		
 		this.stylesheet = stylesheet;
+		this.featureMappings = featureMappings;
 		
 	}
 	
@@ -85,7 +96,8 @@ public class XSLTProcessor implements Serializable {
 	
 	
 	/**
-	 * Get an instance of XSLTProcessor.
+	 * Get an instance of XSLTProcessor and then do a one time initialization to improve
+	 * performance for repetitive invocations of transformations.
 	 * 
 	 * @param stylesheet
 	 * @return XSLTProcessor
@@ -93,12 +105,30 @@ public class XSLTProcessor implements Serializable {
 	 */
 	public static XSLTProcessor getInstance(String stylesheet) throws XSLTException {
 			
-		XSLTProcessor proc = new XSLTProcessor(stylesheet);	
+		XSLTProcessor proc = new XSLTProcessor(stylesheet, null);	
 		proc.init();
 		return proc;
 		
 	}
 
+
+	/**
+	 * Get an instance of XSLTProcessor and then do a one time initialization to improve
+	 * performance for repetitive invocations of transformations.
+	 * 
+	 * @param stylesheet
+	 * @param featureMappings Processor feature mappings
+	 * @return XSLTProcessor
+	 * @throws XSLTException 
+	 */
+	public static XSLTProcessor getInstance(String stylesheet, HashMap<String,Object> featureMappings) throws XSLTException {
+			
+		XSLTProcessor proc = new XSLTProcessor(stylesheet, featureMappings);	
+		proc.init();
+		return proc;
+		
+	}
+	
 	
 	/**
 	 * Initialization to improve performance for repetitive invocations of transformations.
@@ -112,6 +142,13 @@ public class XSLTProcessor implements Serializable {
 			// Get the processor
 			proc = new Processor(false);
 		
+			// Set any specified configuration properties for the processor
+			if (featureMappings != null) {
+				for (Entry<String, Object> entry : featureMappings.entrySet()) {
+					proc.setConfigurationProperty(entry.getKey(), entry.getValue());
+				}
+			}
+			
 			// Get the xslt compiler
 			XsltCompiler xsltCompiler = proc.newXsltCompiler();
 		
