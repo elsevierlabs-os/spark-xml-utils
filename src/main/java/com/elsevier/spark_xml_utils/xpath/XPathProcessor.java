@@ -164,8 +164,6 @@ public class XPathProcessor implements Serializable {
 	private void init() throws XPathException {
 		
 		try {
-		
-			log.info("***** XPathProcessor init called.");
 			
 			// Get the processor
 			proc = new Processor(false);

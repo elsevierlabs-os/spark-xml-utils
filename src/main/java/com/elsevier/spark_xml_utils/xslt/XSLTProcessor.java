@@ -25,9 +25,12 @@ import java.util.Map.Entry;
 
 import javax.xml.transform.stream.StreamSource;
 
+import net.sf.saxon.s9api.DocumentBuilder;
 import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.Serializer;
+import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
@@ -58,6 +61,7 @@ public class XSLTProcessor implements Serializable {
 	private transient Serializer serializer = null;
 	private transient ByteArrayOutputStream baos = null;
 	private transient XsltTransformer trans = null;
+	private transient DocumentBuilder builder = null;
 	
 	
 	/**
@@ -151,6 +155,9 @@ public class XSLTProcessor implements Serializable {
 			
 			// Get the xslt compiler
 			XsltCompiler xsltCompiler = proc.newXsltCompiler();
+			
+			// Get the document builder (used for params)
+			builder = proc.newDocumentBuilder();
 		
 			// Set the uri resolver (for imported/included stylesheets)
 			xsltCompiler.setURIResolver(new S3URIResolver());
@@ -194,13 +201,28 @@ public class XSLTProcessor implements Serializable {
 	 */
 	public String transform(String content) throws XSLTException {
 
+		// Apply transformation
+		return transform(content, new HashMap<String,String>());
+
+	}
+
+	/**
+	 * Transform the content.
+	 * 
+	 * @param content the xml to be transformed
+	 * @param stylesheetParams HashMap of stylesheet params
+	 * @return transformed content
+	 * @throws XSLTException
+	 */
+	public String transform(String content, HashMap<String,String> stylesheetParams) throws XSLTException {
+
 		try {
 
 			// Create streamsource for the content
 			StreamSource contentSource = new StreamSource(IOUtils.toInputStream(content, CharEncoding.UTF_8));
 
 			// Apply transformation
-			return transform(contentSource);
+			return transform(contentSource, stylesheetParams);
 
 		} catch (IOException e) {
 			
@@ -210,21 +232,27 @@ public class XSLTProcessor implements Serializable {
 		} 
 
 	}
-
 	
 	/**
 	 * Transform the content.
 	 * @param content the xml to be transformed
+	 * @param stylesheetParams HashMap of stylesheet params
 	 * @return transformed content
 	 * @throw XSLTException
 	 */
-	private String transform(StreamSource content) throws XSLTException {
+	private String transform(StreamSource content, HashMap<String,String> stylesheetParams) throws XSLTException {
 		
 		try {
 			
 			//Reset the serializer
 			serializer.close();
 			baos.reset();
+			
+			// Set stylesheet parameters (if any were specified)
+			for (Entry<String, String> entry : stylesheetParams.entrySet()) {
+				XdmValue xdmValue = builder.build(new StreamSource(IOUtils.toInputStream(entry.getValue(), CharEncoding.UTF_8)));
+				trans.setParameter(new QName("",entry.getKey()), xdmValue);
+			}
 			
 			// Set the content to use for the transformation
 			trans.setSource(content);
