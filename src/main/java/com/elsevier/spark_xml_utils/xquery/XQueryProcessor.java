@@ -18,6 +18,7 @@ package com.elsevier.spark_xml_utils.xquery;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -210,11 +211,26 @@ public class XQueryProcessor implements Serializable {
 	 * @return Serialized response from the evaluation. 
 	 * @throws XQueryException
 	 */
+	public String evaluate(String content) throws XQueryException {
+		
+		return evaluateString(content);
+			
+	}
+	
+	
+	/**
+	 * Evaluate the content with the XQuery expression specified when creating the XQueryProcessor
+	 * and return a serialized response.
+	 * 
+	 * @param content String to which the XQuery Expression will be evaluated
+	 * @return Serialized response from the evaluation. 
+	 * @throws XQueryException
+	 */
 	public String evaluateString(String content) throws XQueryException {
 
 		try {
 
-			return evaluate(new StreamSource(IOUtils.toInputStream(content,CharEncoding.UTF_8)));
+			return evaluateStream(IOUtils.toInputStream(content,CharEncoding.UTF_8));
 
 		} catch (IOException e) {
 			
@@ -225,6 +241,35 @@ public class XQueryProcessor implements Serializable {
 
 	}
 
+	
+	/**
+	 * Evaluate the content with the XQuery expression specified when creating the XQueryProcessor
+	 * and return a serialized response.
+	 * 
+	 * @param content InputStream to which the XQuery Expression will be evaluated
+	 * @return Serialized response from the evaluation. 
+	 * @throws XQueryException
+	 */
+	public String evaluate(InputStream content) throws XQueryException {
+		
+		return evaluateStream(content);
+		
+	}
+	
+	
+	/**
+	 * Evaluate the content with the XQuery expression specified when creating the XQueryProcessor
+	 * and return a serialized response.
+	 * 
+	 * @param content InputStream to which the XQuery Expression will be evaluated
+	 * @return Serialized response from the evaluation. 
+	 * @throws XQueryException
+	 */
+	public String evaluateStream(InputStream content) throws XQueryException {
+
+		return evaluate(new StreamSource(content));
+
+	}
 	
 	/**
 	 * Evaluate the content with the XQuery expression specified when creating the XQueryProcessor

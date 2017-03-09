@@ -18,6 +18,7 @@ package com.elsevier.spark_xml_utils.xslt;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -206,6 +207,22 @@ public class XSLTProcessor implements Serializable {
 
 	}
 
+	
+	/**
+	 * Transform the content.
+	 * 
+	 * @param content the xml to be transformed
+	 * @return transformed content
+	 * @throws XSLTException
+	 */
+	public String transform(InputStream content) throws XSLTException {
+
+		// Apply transformation
+		return transform(new StreamSource(content), new HashMap<String,String>());
+
+	}
+	
+	
 	/**
 	 * Transform the content.
 	 * 

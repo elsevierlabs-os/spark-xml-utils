@@ -18,6 +18,7 @@ package com.elsevier.spark_xml_utils.xpath;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -212,13 +213,25 @@ public class XPathProcessor implements Serializable {
 	 * @return TRUE if the XPath expression evaluates to true, FALSE otherwise
 	 * @throws XPathException
 	 */
+	public boolean filter(String content) throws XPathException {
+		
+		return filterString(content);
+		
+	}
+	
+	
+	/**
+	 * Filter the content with the XPath expression specified when creating the XPathProcessor.
+	 * 
+	 * @param content String to which the XPath expression will be applied
+	 * @return TRUE if the XPath expression evaluates to true, FALSE otherwise
+	 * @throws XPathException
+	 */
 	public boolean filterString(String content) throws XPathException {
 
 		try {
 
-			return filter(
-					new StreamSource(IOUtils.toInputStream(content,
-							CharEncoding.UTF_8)));
+			return filterStream(IOUtils.toInputStream(content,CharEncoding.UTF_8));
 
 		} catch (IOException e) {
 			
@@ -227,6 +240,49 @@ public class XPathProcessor implements Serializable {
 			
 		}
 
+	}
+	
+	
+	/**
+	 * Filter the content with the XPath expression specified when creating the XPathProcessor.
+	 * 
+	 * @param content InputStream to which the XPath expression will be applied
+	 * @return TRUE if the XPath expression evaluates to true, FALSE otherwise
+	 * @throws XPathException
+	 */
+	public boolean filter(InputStream content) throws XPathException {
+		
+		return filterStream(content);
+		
+	}
+	
+	
+	/**
+	 * Filter the content with the XPath expression specified when creating the XPathProcessor.
+	 * 
+	 * @param content InputStream to which the XPath expression will be applied
+	 * @return TRUE if the XPath expression evaluates to true, FALSE otherwise
+	 * @throws XPathException
+	 */
+	public boolean filterStream(InputStream content) throws XPathException {
+
+		return filter(new StreamSource(content));
+
+	}
+	
+	
+	/**
+	 * Evaluate the content with the XPath expression specified when creating the XPathProcessor
+	 * and return a serialized response.
+	 * 
+	 * @param content String to which the XPath Expression will be evaluated
+	 * @return Serialized response from the evaluation.  
+	 * @throws XPathException
+	 */
+	public String evaluate(String content) throws XPathException{
+		
+		return evaluateString(content);
+		
 	}
 	
 	
@@ -242,9 +298,7 @@ public class XPathProcessor implements Serializable {
 
 		try {
 			
-			return evaluate(
-					new StreamSource(IOUtils.toInputStream(content,
-							CharEncoding.UTF_8)));
+			return evaluateStream(IOUtils.toInputStream(content,CharEncoding.UTF_8));
 
 		} catch (IOException e) {
 			
@@ -255,6 +309,37 @@ public class XPathProcessor implements Serializable {
 
 	}
 
+
+	/**
+	 * Evaluate the content with the XPath expression specified when creating the XPathProcessor
+	 * and return a serialized response.
+	 * 
+	 * @param content InputStream to which the XPath Expression will be evaluated
+	 * @return Serialized response from the evaluation.  
+	 * @throws XPathException
+	 */
+	public String evaluate(InputStream content) throws XPathException{ 
+		
+		return evaluateStream(content);
+		
+	}
+	
+	
+	/**
+	 * Evaluate the content with the XPath expression specified when creating the XPathProcessor
+	 * and return a serialized response.
+	 * 
+	 * @param content InputStream to which the XPath Expression will be evaluated
+	 * @return Serialized response from the evaluation.  
+	 * @throws XPathException
+	 */
+	public String evaluateStream(InputStream content) throws XPathException{
+
+
+		return evaluate(new StreamSource(content));
+
+
+	}
 	
 	/**
 	 * Filter the content with the XPath expression specified when creating the XPathProcessor.
@@ -329,7 +414,7 @@ public class XPathProcessor implements Serializable {
 		}
 
 	}
-
+	
 	
 	/**
 	 * Set the namespaces in the XPathCompiler.
@@ -363,5 +448,6 @@ public class XPathProcessor implements Serializable {
 		xpathCompiler.declareNamespace("fn",NamespaceConstant.FN);
 
 	}
-
+	
+	
 }
