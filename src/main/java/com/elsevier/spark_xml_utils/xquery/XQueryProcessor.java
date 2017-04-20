@@ -30,11 +30,13 @@ import javax.xml.transform.stream.StreamSource;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XQueryCompiler;
 import net.sf.saxon.s9api.XQueryEvaluator;
 import net.sf.saxon.s9api.XQueryExecutable;
+import net.sf.saxon.s9api.XdmAtomicValue;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
@@ -200,6 +202,17 @@ public class XQueryProcessor implements Serializable {
 
 		}
 		
+	}
+	
+	
+	/**
+	 * Set the external variable.  The value should be a String.
+	 * 
+	 * @param name  Name of the external variable in the XQuery
+	 * @param value Value for the external variable 
+	 */
+	public void setExternalVariable(String name, String value) {
+		eval.setExternalVariable(new QName(name), new XdmAtomicValue(value));
 	}
 	
 	
