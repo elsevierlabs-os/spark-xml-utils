@@ -13,7 +13,7 @@
     <dependency>
       <groupId>net.sf.saxon</groupId> <!-- Saxon dependency -->
       <artifactId>Saxon-HE</artifactId>
-      <version>9.6.0-7</version>
+      <version>9.8.0-6</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>  <!-- Apache commons io -->
