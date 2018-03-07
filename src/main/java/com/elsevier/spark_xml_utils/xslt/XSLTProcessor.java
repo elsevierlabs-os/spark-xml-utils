@@ -165,7 +165,6 @@ public class XSLTProcessor implements Serializable {
 		
 			// Compile the stylesheet
 			XsltExecutable exp = xsltCompiler.compile(new StreamSource(IOUtils.toInputStream(stylesheet, CharEncoding.UTF_8)));
-
 		
 			// Set up the output for the transformation
 			baos = new ByteArrayOutputStream();
@@ -190,6 +189,15 @@ public class XSLTProcessor implements Serializable {
 			
 		} 
 		
+	}
+	
+	
+	/**
+	 * Set the output method (the default is xml).
+	 * @param method
+	 */
+	public void setOutputMethod(String method)  {
+		serializer.setOutputProperty(Serializer.Property.METHOD, method);
 	}
 	
 	
@@ -270,6 +278,7 @@ public class XSLTProcessor implements Serializable {
 				XdmValue xdmValue = builder.build(new StreamSource(IOUtils.toInputStream(entry.getValue(), CharEncoding.UTF_8)));
 				trans.setParameter(new QName("",entry.getKey()), xdmValue);
 			}
+			
 			
 			// Set the content to use for the transformation
 			trans.setSource(content);

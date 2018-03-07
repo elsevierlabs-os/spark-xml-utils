@@ -204,6 +204,14 @@ public class XQueryProcessor implements Serializable {
 		
 	}
 	
+	/**
+	 * Set the output method (the default is xml).
+	 * @param method
+	 */
+	public void setOutputMethod(String method)  {
+		serializer.setOutputProperty(Serializer.Property.METHOD, method);
+	}
+	
 	
 	/**
 	 * Set the external variable.  The value should be a String.

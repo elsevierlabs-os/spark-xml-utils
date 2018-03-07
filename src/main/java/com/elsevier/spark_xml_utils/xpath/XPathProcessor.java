@@ -195,7 +195,7 @@ public class XPathProcessor implements Serializable {
 			serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
 			serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION,"yes");			
 			serializer.setProcessor(proc);
-		
+			
 		} catch (SaxonApiException e) {
 			
 			log.error("Problems creating an XPathProcessor.  " + e.getMessage(),e);
@@ -203,6 +203,15 @@ public class XPathProcessor implements Serializable {
 
 		}
 		
+	}
+
+	
+	/**
+	 * Set the output method (the default is xml).
+	 * @param method
+	 */
+	public void setOutputMethod(String method)  {
+		serializer.setOutputProperty(Serializer.Property.METHOD, method);
 	}
 	
 	
