@@ -14,3 +14,11 @@ The spark-xml-utils library was developed because there is a large amount of XML
 The basic examples included only scratch the surface for what is possible with spark-xml-utils and [XPath](https://github.com/elsevierlabs/spark-xml-utils/wiki/xpath), [XQuery](https://github.com/elsevierlabs/spark-xml-utils/wiki/XQuery), and [XSLT](https://github.com/elsevierlabs/spark-xml-utils/wiki/xslt).  I have used spark-xml-utils to transform millions of XML documents to json and html, performed a simple batch search against millions of XML documents, and more. Some more [complex examples](https://github.com/elsevierlabs/spark-xml-utils/wiki/complexexamples) are available to further showcase the power of spark-xml-utils.
 
 The  sequence file used in all of the examples is publicly available in s3://spark-xml-utils/xml/part*.  In the sequence file, the key is a unique identifier for the record and the value is the XML (as a string).  This should allow you to try out the examples as well as experiment with your own expressions.
+
+## Maven Coordinate
+
+	<dependency> 
+    	<groupId>com.elsevier</groupId>
+    	<artifactId>spark-xml-utils</artifactId>
+    	<version>1.8.0</version>
+	</dependency>
