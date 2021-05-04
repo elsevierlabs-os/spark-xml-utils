@@ -21,11 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 import javax.xml.transform.stream.StreamSource;
 
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.DocumentBuilder;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.QName;
@@ -37,7 +39,6 @@ import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -150,7 +151,7 @@ public class XSLTProcessor implements Serializable {
 			// Set any specified configuration properties for the processor
 			if (featureMappings != null) {
 				for (Entry<String, Object> entry : featureMappings.entrySet()) {
-					proc.setConfigurationProperty(entry.getKey(), entry.getValue());
+					proc.setConfigurationProperty((Feature)(Feature.byName(entry.getKey())), entry.getValue());
 				}
 			}
 			
@@ -164,7 +165,7 @@ public class XSLTProcessor implements Serializable {
 			xsltCompiler.setURIResolver(new S3URIResolver());
 		
 			// Compile the stylesheet
-			XsltExecutable exp = xsltCompiler.compile(new StreamSource(IOUtils.toInputStream(stylesheet, CharEncoding.UTF_8)));
+			XsltExecutable exp = xsltCompiler.compile(new StreamSource(IOUtils.toInputStream(stylesheet, StandardCharsets.UTF_8.name())));
 		
 			// Set up the output for the transformation
 			baos = new ByteArrayOutputStream();
@@ -244,7 +245,7 @@ public class XSLTProcessor implements Serializable {
 		try {
 
 			// Create streamsource for the content
-			StreamSource contentSource = new StreamSource(IOUtils.toInputStream(content, CharEncoding.UTF_8));
+			StreamSource contentSource = new StreamSource(IOUtils.toInputStream(content, StandardCharsets.UTF_8.name()));
 
 			// Apply transformation
 			return transform(contentSource, stylesheetParams);
@@ -275,7 +276,7 @@ public class XSLTProcessor implements Serializable {
 			
 			// Set stylesheet parameters (if any were specified)
 			for (Entry<String, String> entry : stylesheetParams.entrySet()) {
-				XdmValue xdmValue = builder.build(new StreamSource(IOUtils.toInputStream(entry.getValue(), CharEncoding.UTF_8)));
+				XdmValue xdmValue = builder.build(new StreamSource(IOUtils.toInputStream(entry.getValue(), StandardCharsets.UTF_8.name())));
 				trans.setParameter(new QName("",entry.getKey()), xdmValue);
 			}
 			
@@ -287,7 +288,7 @@ public class XSLTProcessor implements Serializable {
 			trans.transform();
 
 			// Return the transformed content
-			return new String(baos.toByteArray(), CharEncoding.UTF_8);
+			return new String(baos.toByteArray(), StandardCharsets.UTF_8.name());
 
 		} catch (IOException e) {
 			

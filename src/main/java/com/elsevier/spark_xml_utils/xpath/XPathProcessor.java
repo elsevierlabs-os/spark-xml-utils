@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -28,6 +29,7 @@ import java.util.Map.Entry;
 
 import javax.xml.transform.stream.StreamSource;
 
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.DocumentBuilder;
 import net.sf.saxon.s9api.Processor;
@@ -40,7 +42,6 @@ import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XdmValue;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -172,7 +173,7 @@ public class XPathProcessor implements Serializable {
 			// Set any specified configuration properties for the processor
 			if (featureMappings != null) {
 				for (Entry<String, Object> entry : featureMappings.entrySet()) {
-					proc.setConfigurationProperty(entry.getKey(), entry.getValue());
+					proc.setConfigurationProperty((Feature)(Feature.byName(entry.getKey())), entry.getValue());
 				}
 			}
 			
@@ -240,7 +241,7 @@ public class XPathProcessor implements Serializable {
 
 		try {
 
-			return filterStream(IOUtils.toInputStream(content,CharEncoding.UTF_8));
+			return filterStream(IOUtils.toInputStream(content,StandardCharsets.UTF_8.name()));
 
 		} catch (IOException e) {
 			
@@ -307,7 +308,7 @@ public class XPathProcessor implements Serializable {
 
 		try {
 			
-			return evaluateStream(IOUtils.toInputStream(content,CharEncoding.UTF_8));
+			return evaluateStream(IOUtils.toInputStream(content,StandardCharsets.UTF_8.name()));
 
 		} catch (IOException e) {
 			
@@ -408,7 +409,7 @@ public class XPathProcessor implements Serializable {
 			}
 
 			// Return the results
-			return new String(baos.toByteArray(), CharEncoding.UTF_8);
+			return new String(baos.toByteArray(), StandardCharsets.UTF_8.name());
 
 		} catch (IOException e) {
 			

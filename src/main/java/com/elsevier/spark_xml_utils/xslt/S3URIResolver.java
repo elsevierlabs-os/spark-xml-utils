@@ -18,6 +18,7 @@ package com.elsevier.spark_xml_utils.xslt;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import javax.xml.transform.Source;
@@ -64,16 +65,16 @@ public class S3URIResolver implements URIResolver {
 			// Check local cache
 			if (stylesheetMap.containsKey(href)) {
 				
-				return new StreamSource(IOUtils.toInputStream(stylesheetMap.get(href)));	
+				return new StreamSource(IOUtils.toInputStream(stylesheetMap.get(href),StandardCharsets.UTF_8.name()));	
 				
 			} else {
 
 				// Read the data from the URL and populate the cache
 				URL theUrl = new URL(href);
-				stylesheetMap.put(href,IOUtils.toString(theUrl.openStream()));	
+				stylesheetMap.put(href,IOUtils.toString(theUrl.openStream(),StandardCharsets.UTF_8.name()));	
 				
 				// Return a StreamSource
-				return new StreamSource(IOUtils.toInputStream(stylesheetMap.get(href)));		
+				return new StreamSource(IOUtils.toInputStream(stylesheetMap.get(href),StandardCharsets.UTF_8.name()));		
 				
 			}
 

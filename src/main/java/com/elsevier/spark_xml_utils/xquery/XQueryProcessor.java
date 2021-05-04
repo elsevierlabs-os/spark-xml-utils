@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -28,6 +29,7 @@ import java.util.Map.Entry;
 
 import javax.xml.transform.stream.StreamSource;
 
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.QName;
@@ -39,7 +41,6 @@ import net.sf.saxon.s9api.XQueryExecutable;
 import net.sf.saxon.s9api.XdmAtomicValue;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -172,13 +173,13 @@ public class XQueryProcessor implements Serializable {
 			// Set any specified configuration properties for the processor
 			if (featureMappings != null) {
 				for (Entry<String, Object> entry : featureMappings.entrySet()) {
-					proc.setConfigurationProperty(entry.getKey(), entry.getValue());
+					proc.setConfigurationProperty((Feature)(Feature.byName(entry.getKey())), entry.getValue());
 				}
 			}
 			
 			// Get the XQuery compiler
 			XQueryCompiler xqueryCompiler = proc.newXQueryCompiler();
-			xqueryCompiler.setEncoding(CharEncoding.UTF_8);
+			xqueryCompiler.setEncoding(StandardCharsets.UTF_8.name());
 
 			// Set the namespace to prefix mappings
 			this.setPrefixNamespaceMappings(xqueryCompiler, namespaceMappings);
@@ -251,7 +252,7 @@ public class XQueryProcessor implements Serializable {
 
 		try {
 
-			return evaluateStream(IOUtils.toInputStream(content,CharEncoding.UTF_8));
+			return evaluateStream(IOUtils.toInputStream(content,StandardCharsets.UTF_8.name()));
 
 		} catch (IOException e) {
 			
@@ -315,7 +316,7 @@ public class XQueryProcessor implements Serializable {
 			eval.run(serializer);
 
 			// Return the results
-			return new String(baos.toByteArray(), CharEncoding.UTF_8);
+			return new String(baos.toByteArray(), StandardCharsets.UTF_8.name());
 
 		} catch (IOException e) {
 			
