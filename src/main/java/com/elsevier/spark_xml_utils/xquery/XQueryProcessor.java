@@ -77,6 +77,7 @@ public class XQueryProcessor implements Serializable {
 		this.xQueryExpression = xQueryExpression;
 		this.namespaceMappings = namespaceMappings;
 		this.featureMappings = featureMappings;
+		this.extensionFunctions = extensionFunctions;
 		
 	}
 
