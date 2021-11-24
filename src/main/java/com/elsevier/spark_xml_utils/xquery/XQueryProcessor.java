@@ -31,14 +31,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.Serializer;
-import net.sf.saxon.s9api.XQueryCompiler;
-import net.sf.saxon.s9api.XQueryEvaluator;
-import net.sf.saxon.s9api.XQueryExecutable;
-import net.sf.saxon.s9api.XdmAtomicValue;
+import net.sf.saxon.s9api.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -63,6 +56,7 @@ public class XQueryProcessor implements Serializable {
 	private String xQueryExpression = null;
 	private HashMap<String,String> namespaceMappings = null;
 	private HashMap<String,Object> featureMappings = null;
+	private Set<ExtensionFunction> extensionFunctions = null;
 	private transient Processor proc  = null;
 	private transient XQueryExecutable exp = null;
 	private transient XQueryEvaluator eval = null;
@@ -78,11 +72,12 @@ public class XQueryProcessor implements Serializable {
 	 * @param featureMappings Processor feature mappings
 	 * @throws XQueryException
 	 */
-	private XQueryProcessor(String xQueryExpression, HashMap<String,String> namespaceMappings, HashMap<String,Object> featureMappings) throws XQueryException  {
+	private XQueryProcessor(String xQueryExpression, HashMap<String,String> namespaceMappings, HashMap<String,Object> featureMappings, Set<ExtensionFunction> extensionFunctions) throws XQueryException  {
 			
 		this.xQueryExpression = xQueryExpression;
 		this.namespaceMappings = namespaceMappings;
 		this.featureMappings = featureMappings;
+		this.extensionFunctions = extensionFunctions;
 		
 	}
 
@@ -116,7 +111,7 @@ public class XQueryProcessor implements Serializable {
 	 */
 	public static XQueryProcessor getInstance(String xQueryExpression) throws XQueryException {
 			
-		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, null, null);	
+		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, null, null, null);
 		proc.init();
 		return proc;
 		
@@ -133,7 +128,7 @@ public class XQueryProcessor implements Serializable {
 	 */
 	public static XQueryProcessor getInstance(String xQueryExpression, HashMap<String,String> namespaceMappings) throws XQueryException {
 			
-		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, namespaceMappings, null);	
+		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, namespaceMappings, null, null);
 		proc.init();
 		return proc;
 		
@@ -151,10 +146,28 @@ public class XQueryProcessor implements Serializable {
 	 */
 	public static XQueryProcessor getInstance(String xQueryExpression, HashMap<String,String> namespaceMappings, HashMap<String,Object> featureMappings) throws XQueryException {
 			
-		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, namespaceMappings, featureMappings);	
+		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, namespaceMappings, featureMappings, null);
 		proc.init();
 		return proc;
 		
+	}
+
+	/**
+	 * Get an instance of XQueryProcessor.
+	 *
+	 * @param xQueryExpression XQuery expression to apply to the content
+	 * @param namespaceMappings Namespace prefix to Namespace uri mappings
+	 * @param featureMappings Processor feature mappings
+	 * @param extensionFunctions Extension functions to be registered to the XQuery Processor
+	 * @return XQueryProcessor
+	 * @throws XQueryException
+	 */
+	public static XQueryProcessor getInstance(String xQueryExpression, HashMap<String,String> namespaceMappings, HashMap<String,Object> featureMappings, Set<ExtensionFunction> extensionFunctions) throws XQueryException {
+
+		XQueryProcessor proc = new XQueryProcessor(xQueryExpression, namespaceMappings, featureMappings, extensionFunctions);
+		proc.init();
+		return proc;
+
 	}
 	
 	
@@ -169,6 +182,13 @@ public class XQueryProcessor implements Serializable {
 			
 			// Get the processor
 			proc = new Processor(false);
+
+			// Register any specified extension functions to the processor
+			if (extensionFunctions != null) {
+				for (ExtensionFunction extensionFunction : extensionFunctions) {
+					proc.registerExtensionFunction(extensionFunction);
+				}
+			}
 
 			// Set any specified configuration properties for the processor
 			if (featureMappings != null) {

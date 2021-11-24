@@ -16,13 +16,14 @@
  */
 package com.elsevier.spark_xml_utils.xquery;
 
+import net.sf.saxon.s9api.*;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.*;
 
 import net.sf.saxon.lib.FeatureKeys;
 
@@ -40,9 +41,9 @@ public class TestXQueryProcessor {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
-	public void testEvaluateString2() {	
+	public void testEvaluateString2() {
 		try {
 			XQueryProcessor proc = XQueryProcessor.getInstance("for $i in /name[.='joe'] return $i");
 			assertEquals("", proc.evaluateString("<name>john</name>"),"Should return nothing.");
@@ -51,7 +52,7 @@ public class TestXQueryProcessor {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
 	public void testEvaluateString3() {
 		try {
@@ -79,7 +80,7 @@ public class TestXQueryProcessor {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
 	public void testEvaluateString5() {
 		try {
@@ -92,7 +93,7 @@ public class TestXQueryProcessor {
 	}
 
 	@Test
-	public void testEvaluateString6() {	
+	public void testEvaluateString6() {
 		try {
 			XQueryProcessor proc = XQueryProcessor.getInstance("for $i in /name[.='joe'] return $i");
 			assertEquals("", proc.evaluateString("<name>john</name>"),"Should return nothing.");
@@ -104,7 +105,7 @@ public class TestXQueryProcessor {
 	}
 
 	@Test
-	public void testEvaluateString7() {	
+	public void testEvaluateString7() {
 		try {
 			HashMap<String,Object> featureMap = new HashMap<String,Object>();
 			featureMap.put(FeatureKeys.ENTITY_RESOLVER_CLASS, "com.elsevier.spark_xml_utils.common.IgnoreDoctype");
@@ -115,9 +116,9 @@ public class TestXQueryProcessor {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
-	public void testEvaluate1() {	
+	public void testEvaluate1() {
 		try {
 			HashMap<String,Object> featureMap = new HashMap<String,Object>();
 			featureMap.put(FeatureKeys.ENTITY_RESOLVER_CLASS, "com.elsevier.spark_xml_utils.common.IgnoreDoctype");
@@ -128,10 +129,10 @@ public class TestXQueryProcessor {
 			e.printStackTrace();
 		}
 	}
-	
+
 
 	@Test
-	public void testEvaluateStream1() {	
+	public void testEvaluateStream1() {
 		try {
 			HashMap<String,Object> featureMap = new HashMap<String,Object>();
 			featureMap.put(FeatureKeys.ENTITY_RESOLVER_CLASS, "com.elsevier.spark_xml_utils.common.IgnoreDoctype");
@@ -152,7 +153,7 @@ public class TestXQueryProcessor {
 	}
 
 	@Test
-	public void testEvaluateExternalVariables1() {	
+	public void testEvaluateExternalVariables1() {
 		try {
 			HashMap<String,Object> featureMap = new HashMap<String,Object>();
 			featureMap.put(FeatureKeys.ENTITY_RESOLVER_CLASS, "com.elsevier.spark_xml_utils.common.IgnoreDoctype");
@@ -167,7 +168,7 @@ public class TestXQueryProcessor {
 	}
 
 	@Test
-	public void testEvaluateExternalVariables2() {	
+	public void testEvaluateExternalVariables2() {
 		try {
 			HashMap<String,Object> featureMap = new HashMap<String,Object>();
 			featureMap.put(FeatureKeys.ENTITY_RESOLVER_CLASS, "com.elsevier.spark_xml_utils.common.IgnoreDoctype");
@@ -182,9 +183,9 @@ public class TestXQueryProcessor {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
-	public void testEvaluateExternalVariables3() {	
+	public void testEvaluateExternalVariables3() {
 		try {
 			HashMap<String,Object> featureMap = new HashMap<String,Object>();
 			featureMap.put(FeatureKeys.ENTITY_RESOLVER_CLASS, "com.elsevier.spark_xml_utils.common.IgnoreDoctype");
@@ -198,8 +199,8 @@ public class TestXQueryProcessor {
 			e.printStackTrace();
 		}
 	}
-	
-	@Test 
+
+	@Test
 	public void testSerialize() {
 		try {
 			XQueryProcessor proc = XQueryProcessor.getInstance("fn:serialize(<darin/>)");
@@ -210,6 +211,141 @@ public class TestXQueryProcessor {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	// A saxon XQuery extension function that appends "test_" when given a string
+	private static class AddPrefix implements ExtensionFunction {
+		private final String namespaceUri;
+		private final String lexical;
+		private final String function_prefix;
+
+		public AddPrefix(String namespaceUri, String lexical, String functionPrefix) {
+			this.namespaceUri = namespaceUri;
+			this.lexical = lexical;
+			this.function_prefix = functionPrefix;
+		}
+
+		@Override
+		public QName getName() {return new QName(namespaceUri, lexical);}
+
+		@Override
+		public SequenceType getResultType() { // returns a string
+			return SequenceType.makeSequenceType(ItemType.STRING, OccurrenceIndicator.ONE);
+		}
+
+		@Override
+		public SequenceType[] getArgumentTypes() { // accepts single string as argument
+			return new SequenceType[]{SequenceType.makeSequenceType(ItemType.STRING, OccurrenceIndicator.ONE)};
+		}
+
+		@Override
+		public XdmValue call(XdmValue[] arguments) { // function logic
+			String arg = arguments[0].itemAt(0).getStringValue();
+			String result = String.join("_", function_prefix, arg);
+			return new XdmAtomicValue(result);
+		}
+	}
+
+	// A saxon XQuery extension function that adds 1 to an integer
+	private static class AddOne implements ExtensionFunction {
+		private final String namespaceUri;
+		private final String lexical;
+
+		public AddOne(String namespaceUri, String lexical) {
+			this.namespaceUri = namespaceUri;
+			this.lexical = lexical;
+		}
+
+		@Override
+		public QName getName() {return new QName(namespaceUri, lexical);}
+
+		@Override
+		public SequenceType getResultType() { // returns a string
+			return SequenceType.makeSequenceType(ItemType.INTEGER, OccurrenceIndicator.ONE);
+		}
+
+		@Override
+		public SequenceType[] getArgumentTypes() { // accepts single string as argument
+			return new SequenceType[]{SequenceType.makeSequenceType(ItemType.INTEGER, OccurrenceIndicator.ONE)};
+		}
+
+		@Override
+		public XdmValue call(XdmValue[] arguments) throws SaxonApiException { // function logic
+			int arg = ((XdmAtomicValue)arguments[0].itemAt(0)).getDecimalValue().intValue();
+			return new XdmAtomicValue(arg + 1);
+		}
+	}
+
+	@Test
+	public void testProcessorWithExtensionFunction() throws XQueryException {
+
+		final String LEXICAL = "test-function";
+		final String NAMESPACE_URI = "https://this.is/a/test";
+		final String NAMESPACE_NAME = "ext-fn";
+
+		final String INPUT = "test";
+		final String FUNCTION_PREFIX = "test";
+		final String EXPECTED_RESULT = String.join("_", FUNCTION_PREFIX, INPUT);
+
+		final String XQUERY = String.format("%s:%s(\"%s\")", NAMESPACE_NAME, LEXICAL, INPUT);
+		final String EMPTY_DOCUMENT = "<empty/>";
+
+		// Create set containing single extension
+		Set<ExtensionFunction> extensionFunctions = new HashSet<>();
+		extensionFunctions.add(new AddPrefix(NAMESPACE_URI, LEXICAL, FUNCTION_PREFIX));
+		// Add namespace for extension
+		HashMap<String, String> namespaces = new HashMap<>();
+		namespaces.put(NAMESPACE_NAME, NAMESPACE_URI);
+
+
+		XQueryProcessor proc = XQueryProcessor.getInstance(
+				XQUERY,
+				namespaces,
+				null,
+				extensionFunctions
+		);
+		assertEquals(EXPECTED_RESULT, proc.evaluate(EMPTY_DOCUMENT));
+	}
+
+	@Test
+	public void testProcessorWithMultipleExtensionFunctions() throws XQueryException {
+		// parameters for function 1
+		final String LEXICAL_1 = "test-function-1";
+		final String NAMESPACE_URI_1 = "https://this.is/a/test/1";
+		final String NAMESPACE_NAME_1 = "ext-fn1";
+		final String INPUT_1 = "test";
+		final String FUNCTION_PREFIX = "test";
+
+		final String XQUERY_1 = String.format("%s:%s(\"%s\")", NAMESPACE_NAME_1, LEXICAL_1, INPUT_1);
+
+		// parameters for function 2
+		final String LEXICAL_2 = "test-function-2";
+		final String NAMESPACE_URI_2 = "https://this.is/a/test/2";
+		final String NAMESPACE_NAME_2 = "ext-fn2";
+		final int INPUT_2 = 3;
+
+		final String XQUERY_2 = String.format("%s:%s(%d)", NAMESPACE_NAME_2, LEXICAL_2, INPUT_2);
+
+		final String EMPTY_DOCUMENT = "<empty/>";
+
+		final String EXPECTED_RESULT_1 = String.join("_", FUNCTION_PREFIX, INPUT_1);
+		final String EXPECTED_RESULT_2 = "4";
+
+		// Create set containing single extension
+		Set<ExtensionFunction> extensionFunctions = new HashSet<>();
+		extensionFunctions.add(new AddPrefix(NAMESPACE_URI_1, LEXICAL_1, FUNCTION_PREFIX));
+		extensionFunctions.add(new AddOne(NAMESPACE_URI_2, LEXICAL_2));
+		// Add namespace for extension
+		HashMap<String, String> namespaces = new HashMap<>();
+		namespaces.put(NAMESPACE_NAME_1, NAMESPACE_URI_1);
+		namespaces.put(NAMESPACE_NAME_2, NAMESPACE_URI_2);
+
+
+		XQueryProcessor proc = XQueryProcessor.getInstance(XQUERY_1, namespaces, null, extensionFunctions);
+		assertEquals(EXPECTED_RESULT_1, proc.evaluate(EMPTY_DOCUMENT));
+
+		proc = XQueryProcessor.getInstance(XQUERY_2, namespaces, null, extensionFunctions);
+		assertEquals(EXPECTED_RESULT_2, proc.evaluate(EMPTY_DOCUMENT));
 	}
 	
 }
